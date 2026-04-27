@@ -15,6 +15,9 @@ lora_qwen3.5_4b_cot/
 gguf_exports/
 gguf_exports_gguf/
 
+# Eval results
+eval_results/
+
 # Model weights
 *.safetensors
 *.gguf

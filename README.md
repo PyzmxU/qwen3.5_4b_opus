@@ -17,15 +17,16 @@
 ```
 qwen3.5_4b_opus/
 ├── config.py                     # 训练参数配置（模型/数据/LoRA/调度）
-├── train.py                      # 训练入口（Unsloth + SFTTrainer，含注释版与加压版两套参数）
+├── train.py                      # 训练入口（Unsloth + SFTTrainer）
 ├── data_handler.py               # 数据处理（HF 数据集加载 + 思维链模板映射 + 清洗过滤）
 ├── inference.py                  # 推理脚本（tokenizer.apply_chat_template 方式）
 ├── inferencecopy.py              # 推理脚本（手动构造 ChatML 格式，中文回复版）
 ├── export_gguf.py                # GGUF 导出（合并 LoRA → q4_k_m + q8_0）
 ├── export_base_gguf_origin.py    # 基础模型 GGUF 导出（不带 LoRA，用于对比实验）
+├── score_gsm8k.py                # GSM8K 评测打分（strict / last / anywhere 三维度）
 └── eval_results/                 # 评估结果（基线 vs LoRA 在 GSM8K 上的表现）
-    ├── base_gsm8k_test/          # 原始 Qwen3.5-4B 基线评测
-    └── lora_gsm8k_test/          # LoRA 微调后评测
+    ├── base_gsm8k_test_full/     # 原始 Qwen3.5-4B 基线评测
+    └── lora_gsm8k_test_full/     # LoRA 微调后评测
 ```
 
 ## 快速开始
