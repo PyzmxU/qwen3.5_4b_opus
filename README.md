@@ -112,6 +112,28 @@ python export_gguf.py
 
 Loss 从 1.89 收敛至 0.35，下降 81.5%，训练曲线平滑无异常。
 
+## 评测结果：GSM8K
+
+使用 `lm-eval` 在 GSM8K 测试集（1319 题）上对比基线模型与 LoRA 微调模型：
+
+| 模型 | 格式 | 有效响应 | 正确数 | 准确率 |
+|------|:-:|:-:|:-:|:-:|
+| Qwen3.5-4B 基线 | Q4_K_M | 0 / 1319 | 0 | 0.00% |
+| LoRA 微调后 | Q4_K_M | 1319 / 1319 | **207** | **15.69%** |
+
+**说明：**
+- 基线模型在 `--reasoning on` 模式下未生成有效输出（未训练 thinking 模式），不反映数学能力。
+- LoRA 模型能正常生成思维链推理，从零响应到 15.69% 精确匹配。
+- 主要失分原因：部分回答在思考中途截断（上下文窗口限制），或数值提取格式不匹配（`#### answer` 标签未出现在响应末尾）。
+- 评测采用 zero-shot、temperature=0.0，仅靠单次生成，未使用 self-consistency 等提升技巧。
+
+**评测命令：**
+```bash
+lm_eval --model local-chat-completions \
+  --model_args model=qwen_cot,base_url=http://127.0.0.1:5003/v1/chat/completions \
+  --tasks gsm8k --batch_size 32 --limit null
+```
+
 ## 数据集
 
 使用 [Claude Opus 4.6 推理数据集](https://huggingface.co/datasets/Roman1111111/claude-opus-4.6-10000x)，包含约 10,000 条 Claude Opus 4.6 的推理对话数据。`data_handler.py` 会在加载时自动将 `reasoning` 字段注入 `<｜begin_of_think｜>` / `<｜end_of_think｜>` 标签，同时过滤超出 `MAX_SEQ_LENGTH` 的超长样本。
