@@ -114,13 +114,19 @@ Loss 从 1.89 收敛至 0.35，下降 81.5%，训练曲线平滑无异常。
 
 ## 评测结果：GSM8K
 
-使用 `lm-eval` 在 GSM8K 测试集（1319 题）上对比基线模型与 LoRA 微调模型。评测采用 zero-shot、temperature=0.0：
+使用 `lm-eval` 在 GSM8K 测试集（1319 题）上对比基线模型与 LoRA 微调模型，评测命令如下：
 
 ```bash
 lm_eval --model local-chat-completions \
-  --model_args model=qwen_cot,base_url=http://127.0.0.1:5003/v1/chat/completions \
-  --tasks gsm8k --batch_size 32 --limit null
+  --tasks gsm8k \
+  --model_args "model=qwen_cot,base_url=http://127.0.0.1:5004/v1/chat/completions,api_key=sk-fake,tokenized_requests=False,num_concurrent=8,max_length=16384,max_gen_toks=4096" \
+  --apply_chat_template \
+  --num_fewshot 5 \
+  --log_samples \
+  --output_path eval_results/base_gsm8k_test_full
 ```
+
+> `--num_fewshot 5`：5-shot 评测，`base_url` 端口对应启动的模型服务（基线 5004，LoRA 5003）。
 
 ### 总体指标
 
