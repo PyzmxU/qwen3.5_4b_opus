@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+
+# Cache
+unsloth_compiled_cache/
+.cache/
+
+# Training artifacts
+outputs_claude_cot/
+lora_qwen3.5_4b_cot/
+gguf_exports/
+gguf_exports_gguf/
+
+# Model weights
+*.safetensors
+*.gguf
+*.bin
+
+# IDE
+.vscode/
