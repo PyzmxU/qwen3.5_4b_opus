@@ -118,19 +118,70 @@ Loss 从 1.89 收敛至 0.35，下降 81.5%，训练曲线平滑无异常。
 
 ## 部署
 
-### llama.cpp
+### llama.cpp API Server（推荐）
+
+使用 `llama-server` 启动 OpenAI 兼容的推理服务，支持 thinking 推理模式：
 
 ```bash
-./llama-cli -m qwen3.5-4b-opus46-cot-Q4_K_M.gguf -p "你的问题" -n 2048 --temp 0.7
+llama-server \
+  -ngl 1000 \
+  --host 0.0.0.0 --port 5003 \
+  --flash-attn on \
+  --cache-type-k q4_0 --cache-type-v q4_0 \
+  -c 15999 \
+  --repeat-penalty 1.0 \
+  --presence-penalty 1.5 \
+  --min-p 0.02 \
+  --top-k 30 --top-p 0.9 --temp 0.85 \
+  --reasoning on \
+  --no-mmap \
+  --chat-template chatml \
+  -m qwen3.5-4b-opus46-cot-Q4_K_M.gguf
+```
+
+参数说明：
+
+| 参数 | 值 | 说明 |
+|------|------|------|
+| `-ngl` | 1000 | 全部层 offload 到 GPU |
+| `--flash-attn` | on | 启用 Flash Attention 2 |
+| `--cache-type-k/v` | q4_0 | KV Cache 4-bit 量化，节省显存 |
+| `-c` | 15999 | 上下文窗口 |
+| `--reasoning` | on | 开启推理模式，模型输出思考过程 |
+| `--no-mmap` | - | 强制加载模型到内存 |
+| `--chat-template` | chatml | ChatML 对话模板 |
+| `--temp` | 0.85 | 采样温度 |
+| `--top-k` | 30 | Top-K 采样 |
+| `--top-p` | 0.9 | Top-P 采样 |
+| `--min-p` | 0.02 | Min-P 采样 |
+| `--presence-penalty` | 1.5 | 存在惩罚，降低重复 |
+
+启动后可通过 `http://localhost:5003/v1/chat/completions` 调用，兼容 OpenAI API。
+
+### llama-cli 命令行
+
+```bash
+./llama-cli -m qwen3.5-4b-opus46-cot-Q4_K_M.gguf \
+  -ngl 1000 --flash-attn on -c 15999 \
+  --reasoning on --temp 0.85 --top-k 30 --top-p 0.9 --min-p 0.02 \
+  --chat-template chatml \
+  -p "一只农场有14只羊，除了8只都死了，还剩几只？请一步步思考。" \
+  -n 2048
 ```
 
 ### Ollama
 
 ```bash
 # 1. 创建 Modelfile
+cat > Modelfile << 'EOF'
 FROM ./qwen3.5-4b-opus46-cot-Q4_K_M.gguf
-PARAMETER temperature 0.7
-PARAMETER num_ctx 8192
+PARAMETER temperature 0.85
+PARAMETER top_k 30
+PARAMETER top_p 0.9
+PARAMETER min_p 0.02
+PARAMETER num_ctx 16000
+SYSTEM You are a helpful AI assistant that always thinks step-by-step. 请用中文回复。
+EOF
 
 # 2. 创建模型
 ollama create qwen3.5-opus-cot -f Modelfile
@@ -139,13 +190,12 @@ ollama create qwen3.5-opus-cot -f Modelfile
 ollama run qwen3.5-opus-cot
 ```
 
-## HuggingFace 模型权重
+## 模型权重
 
-| 模型 | 仓库 | 说明 |
+| 平台 | 仓库 | 内容 |
 |------|------|------|
-| LoRA 适配器 | [Pyzmxu/qwen3.5-4b-opus46-cot-lora](https://huggingface.co/Pyzmxu/qwen3.5-4b-opus46-cot-lora) | QLoRA 微调权重（思维链推理） |
-| GGUF q4_k_m | [Pyzmxu/qwen3.5-4b-opus46-cot-q4km](https://huggingface.co/Pyzmxu/qwen3.5-4b-opus46-cot-q4km) | 4-bit 量化模型 |
-| GGUF q8_0 | [Pyzmxu/qwen3.5-4b-opus46-cot-q8](https://huggingface.co/Pyzmxu/qwen3.5-4b-opus46-cot-q8) | 8-bit 量化模型 |
+| ModelScope | [oooooo0o/qwen3.5-4b-opus46-cot](https://www.modelscope.cn/models/oooooo0o/qwen3.5-4b-opus46-cot) | LoRA + GGUF Q4_K_M + GGUF Q8_0 |
+| GitHub | [Pyzmxu/qwen3.5_4b_opus](https://github.com/Pyzmxu/qwen3.5_4b_opus) | 训练代码 |
 
 ## License
 
