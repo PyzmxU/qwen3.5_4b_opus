@@ -246,6 +246,7 @@ ollama run qwen3.5-opus-cot
 
 | 平台 | 仓库 | 内容 |
 |------|------|------|
+| HuggingFace | [mahahahug/qwen3.5-4b-opus46-cot](https://huggingface.co/mahahahug/qwen3.5-4b-opus46-cot) | LoRA + GGUF Q4_K_M + GGUF Q8_0 |
 | ModelScope | [oooooo0o/qwen3.5-4b-opus46-cot](https://www.modelscope.cn/models/oooooo0o/qwen3.5-4b-opus46-cot) | LoRA + GGUF Q4_K_M + GGUF Q8_0 |
 | GitHub | [Pyzmxu/qwen3.5_4b_opus](https://github.com/Pyzmxu/qwen3.5_4b_opus) | 训练代码 |
 
